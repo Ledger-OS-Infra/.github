@@ -12,20 +12,30 @@ Inbound bank transfers are fundamentally broken for business automation; notific
 
 Our flagship project, **LedgerCore**, sits directly on top of fintech infrastructure (like Nomba Virtual Accounts) to capture inbound payment webhooks and instantly convert them into beautifully structured, audit-ready financial events.
 
-Nomba Virtual Account Bank Transfer
-                    │
-                    ▼
-     [ Express.js API Webhook Receiver ]
-     ├── Signature Verification & Idempotency Check
-     └── Enqueue Asynchronous Processing
-                    │
-                    ▼
-     [ BullMQ Reconciliation Workers ] 
-     ├── 3-Tier Cascade Matching (Exact ── Reference ── FIFO)
-     └── Atomic DB Transaction Allocation
-                    │
-                    ▼
-      PostgreSQL Immutable Ledger & Wallet
+```mermaid
+graph TD
+    A[Nomba Virtual Account Bank Transfer] --> B[Express.js API Webhook Receiver]
+    
+    subgraph Express.js Backend
+        B --> B1[Signature Verification & Idempotency Check]
+        B --> B2[Enqueue Asynchronous Processing]
+    end
+
+    B2 --> C[BullMQ Reconciliation Workers]
+
+    subgraph Background Processing
+        C --> C1[3-Tier Cascade Matching<br>Exact ➔ Reference ➔ FIFO]
+        C --> C2[Atomic DB Transaction Allocation]
+    end
+
+    C2 --> D[(PostgreSQL Immutable Ledger & Wallet)]
+
+    %% Styling to make it look clean
+    style A fill:#f9f9f9,stroke:#333,stroke-width:1px
+    style B fill:#e1f5fe,stroke:#0288d1,stroke-width:1px
+    style C fill:#ede7f6,stroke:#5e35b1,stroke-width:1px
+    style D fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+```
 
 ---
 
